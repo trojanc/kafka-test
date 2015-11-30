@@ -1,0 +1,25 @@
+{
+  "name": "node-client",
+  "version": "1.0.0",
+  "description": "A simple nodejs kafka client",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trojanc/kafka-test.git"
+  },
+  "keywords": [
+    "kafka",
+    "client"
+  ],
+  "scripts" : {
+	  "start" : "node main.js"
+  },
+  "author" : "Charl Thiem",
+  "bugs": {
+    "url": "https://github.com/trojanc/kafka-test/issues"
+  },
+  "homepage": "https://github.com/trojanc/kafka-test#readme",
+  "dependencies": {
+    "kafka-node": "^0.2.29"
+  }
+}
