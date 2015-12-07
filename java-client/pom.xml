@@ -1,0 +1,111 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>coza.opencollab.kafka</groupId>
+	<artifactId>java-client</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>Java Kafka Client</name>
+	<description>A test for a java Kafka client</description>
+	<url>http://www.opencollab.co.za</url>
+
+	<inceptionYear>2015</inceptionYear>
+	<organization>
+		<name>OpenCollab</name>
+		<url>http://www.opencollab.co.za/</url>
+	</organization>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.source>1.8</java.source>
+		<maven.min.version>3.0.4</maven.min.version>
+		<project.jdk.min.version>1.8</project.jdk.min.version>
+		<enforcer.phase>validate</enforcer.phase>
+		<kafka.version>0.9.0.0</kafka.version>
+		<kafka.scala.version>2.11</kafka.scala.version>
+
+
+		<!-- Plugins -->
+		<plugin.assembly.version>2.5.3</plugin.assembly.version>
+		<plugin.enforcer.version>1.3.1</plugin.enforcer.version>
+		<plugin.install.version>2.5.2</plugin.install.version>
+		<plugin.javadoc.version>2.10.1</plugin.javadoc.version>
+		<plugin.clean.version>2.6.1</plugin.clean.version>
+		<plugin.resources.version>2.7</plugin.resources.version>
+		<plugin.compiler.version>3.2</plugin.compiler.version>
+		<plugin.jar.version>2.5</plugin.jar.version>
+		<plugin.dependency.version>2.9</plugin.dependency.version>
+		<plugin.source.version>2.4</plugin.source.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_${kafka.scala.version}</artifactId>
+			<version>${kafka.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<!-- All plugins used must be declared here to manage the versions -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${plugin.resources.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>${plugin.dependency.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${plugin.source.version}</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>${plugin.enforcer.version}</version>
+					<executions>
+						<execution>
+							<id>enforce</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<phase>${enforcer.phase}</phase>
+							<configuration>
+								<rules>
+									<requireMavenVersion>
+										<message>To build this project, maven ${maven.min.version} (or
+											higher) is required. Please install the specified version.</message>
+											<version>${maven.min.version}</version>
+										</requireMavenVersion>
+										<requireJavaVersion>
+											<message>To build this project, java
+												${project.jdk.min.version} (or higher) is required. Please
+												install the specified version.</message>
+												<version>${project.jdk.min.version}</version>
+											</requireJavaVersion>
+											<requirePluginVersions>
+												<message>Build reproducibility: It is a best practice to
+													explicitly specify plugin versions!</message>
+												</requirePluginVersions>
+											</rules>
+										</configuration>
+									</execution>
+								</executions>
+							</plugin>
+							<plugin>
+								<groupId>org.apache.maven.plugins</groupId>
+								<artifactId>maven-compiler-plugin</artifactId>
+								<configuration>
+									<source>${java.source}</source>
+									<target>${java.source}</target>
+									<showDeprecation>true</showDeprecation>
+								</configuration>
+							</plugin>
+						</plugins>
+					</pluginManagement>
+				</build>
+			</project>
