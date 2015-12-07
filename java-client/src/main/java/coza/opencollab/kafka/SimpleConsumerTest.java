@@ -19,7 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import kafka.cluster.BrokerEndPoint;
 
-public class KafkaClient {
+public class SimpleConsumerTest {
 
 	private static int MAX_READS = 1000;
 
@@ -34,27 +34,21 @@ public class KafkaClient {
 	private List<String> availableBrokers = new ArrayList<String>();
 
 
-	public KafkaClient() {
+	public SimpleConsumerTest() {
 		seedBrokers.add("localhost");
 		try {
 			run();
 		} catch (Exception ex) {
-			Logger.getLogger(KafkaClient.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(SimpleConsumerTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
 
 	public static void main(String args[]) {
-		KafkaClient kafkaClient = new KafkaClient();
+		SimpleConsumerTest kafkaClient = new SimpleConsumerTest();
 	}
 
-
-
-
-
 	public void run() throws Exception {
-
-
 		// find the meta data about the topic and partition we are interested in
 		//
 		PartitionMetadata metadata = findLeader(seedBrokers, PORT, TOPIC, PARTITION);
@@ -78,9 +72,9 @@ public class KafkaClient {
 				consumer = new SimpleConsumer(leadBroker, PORT, 100000, 64 * 1024, clientName);
 			}
 			FetchRequest req = new FetchRequestBuilder()
-			.clientId(clientName)
-			.addFetch(TOPIC, PARTITION, readOffset, 100000) // Note: this fetchSize of 100000 might need to be increased if large batches are written to Kafka
-			.build();
+					.clientId(clientName)
+					.addFetch(TOPIC, PARTITION, readOffset, 100000) // Note: this fetchSize of 100000 might need to be increased if large batches are written to Kafka
+					.build();
 			FetchResponse fetchResponse = consumer.fetch(req);
 
 			if (fetchResponse.hasError()) {
@@ -130,10 +124,10 @@ public class KafkaClient {
 
 	public static long getLastOffset(SimpleConsumer consumer, String topic, int partition, long whichTime, String clientName) {
 		TopicAndPartition topicAndPartition = new TopicAndPartition(topic, partition);
-		
+
 		Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
 		requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(whichTime, 1));
-		
+
 		// Create a request to get our current offset
 		kafka.javaapi.OffsetRequest request = new kafka.javaapi.OffsetRequest(requestInfo, kafka.api.OffsetRequest.CurrentVersion(), clientName);
 		OffsetResponse response = consumer.getOffsetsBefore(request);
@@ -193,37 +187,37 @@ public class KafkaClient {
 	private PartitionMetadata findLeader(List<String> seedBrokers, int port, String topic, int partition) {
 		PartitionMetadata returnMetaData = null;
 		loop:
-		// Loop through all the seed brokers to find the current leader
-		for (String seed : seedBrokers) {
-			SimpleConsumer consumer = null;
-			try {
-				// Create a temp consumer to one of the seeds
-				consumer = new SimpleConsumer(seed, port, 100000, 64 * 1024, "leaderLookup");
-				
-				// Convert our single topic to a list
-				List<String> topics = Collections.singletonList(topic);
-				
-				// Create topic meta data request with our list
-				TopicMetadataRequest req = new TopicMetadataRequest(topics);
-				
-				kafka.javaapi.TopicMetadataResponse resp = consumer.send(req);
+			// Loop through all the seed brokers to find the current leader
+			for (String seed : seedBrokers) {
+				SimpleConsumer consumer = null;
+				try {
+					// Create a temp consumer to one of the seeds
+					consumer = new SimpleConsumer(seed, port, 100000, 64 * 1024, "leaderLookup");
 
-				List<TopicMetadata> metaData = resp.topicsMetadata();
-				for (TopicMetadata item : metaData) {
-					for (PartitionMetadata part : item.partitionsMetadata()) {
-						if (part.partitionId() == partition) {
-							returnMetaData = part;
-							break loop;
+					// Convert our single topic to a list
+					List<String> topics = Collections.singletonList(topic);
+
+					// Create topic meta data request with our list
+					TopicMetadataRequest req = new TopicMetadataRequest(topics);
+
+					kafka.javaapi.TopicMetadataResponse resp = consumer.send(req);
+
+					List<TopicMetadata> metaData = resp.topicsMetadata();
+					for (TopicMetadata item : metaData) {
+						for (PartitionMetadata part : item.partitionsMetadata()) {
+							if (part.partitionId() == partition) {
+								returnMetaData = part;
+								break loop;
+							}
 						}
 					}
+				} catch (Exception e) {
+					System.out.println("Error communicating with Broker [" + seed + "] to find Leader for [" + topic + ", " + partition + "] Reason: " + e);
+				} finally {
+					if (consumer != null) consumer.close();
 				}
-			} catch (Exception e) {
-				System.out.println("Error communicating with Broker [" + seed + "] to find Leader for [" + topic + ", " + partition + "] Reason: " + e);
-			} finally {
-				if (consumer != null) consumer.close();
 			}
-		}
-		
+
 		// Clear the list and add the new brokers that was found
 		if (returnMetaData != null) {
 			availableBrokers.clear();
